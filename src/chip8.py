@@ -104,7 +104,7 @@ class Chip8(object):
             # 7XNN Adds NN to VX.
             self.v[n1] = (self.v[n1] + b1) % 256
         elif n0 == 8 and n3 == 0:
-            #8XY0 Sets VX to the value of VY.
+            # 8XY0 Sets VX to the value of VY.
             self.v[n1] = self.v[n2]
         elif n0 == 8 and n3 == 2:
             # 8XY2 Sets VX to VX and VY.
@@ -191,6 +191,10 @@ class Chip8(object):
             # FX15 Sets the delay timer to VX.
             self.delay_timer = self.v[n1]
 
+        elif n0 == 0xf and n2 == 1 and n3 == 8:
+            # FX18 Sets the sound timer to VX.
+            self.sound_timer = self.v[n1]
+
         elif n0 == 0xf and n2 == 2 and n3 == 9:
             # FX29 Sets I to the location of the sprite for the character in
             # VX. Characters 0-F (in hexadecimal) are represented by a 4x5
@@ -213,10 +217,6 @@ class Chip8(object):
             for vv in range(n1+1):
                 self.v[vv] = self.mem[self.i + vv]
             self.i += (n1+1)
-
-        elif n0 == 0xf and n2 == 1 and n3 == 8:
-            #FX18 Sets the sound timer to VX.
-            self.sound_timer = self.v[n1]
 
         else:
             raise RuntimeError, "%02X%02X unimplemented" % (b0, b1)
