@@ -102,7 +102,7 @@ class Chip8(object):
             self.v[n1] = b1
         elif n0 == 7:
             # 7XNN Adds NN to VX.
-            self.v[n1] += b1
+            self.v[n1] = (self.v[n1] + b1) % 256
         elif n0 == 8 and n3 == 0:
             #8XY0 Sets VX to the value of VY.
             self.v[n1] = self.v[n2]

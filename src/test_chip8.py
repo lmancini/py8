@@ -18,5 +18,12 @@ class TestChip8(unittest.TestCase):
         self.run_code("\xa2\x00\xff\x65")
         self.assertEqual(self.c8.i, 0x210)
 
+    def test_7XNN_wrap_no_carry(self):
+        # Set v0 to 0xFF, add 2
+        self.run_code("\x60\xff\x70\x02")
+        self.assertEqual(self.c8.v[0], 1)
+        # Carry untouched
+        self.assertEqual(self.c8.v[15], None)
+
 if __name__ == "__main__":
     unittest.main()
