@@ -118,9 +118,7 @@ class Chip8(object):
             # borrow, and 1 when there isn't.
             sub = self.v[n1] - self.v[n2]
             self.v[n1] = sub % 256
-            self.v[15] = 1
-            if sub < 0:
-                self.v[15] = 0
+            self.v[15] = (sub / 256) + 1
         elif n0 == 0xa:
             # ANNN Sets I to the address NNN.
             self.i = (n1 << 8) + b1
