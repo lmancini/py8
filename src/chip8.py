@@ -212,6 +212,7 @@ class Chip8(object):
             # I.
             for vv in range(n1+1):
                 self.v[vv] = self.mem[self.i + vv]
+            self.i += (n1+1)
 
         elif n0 == 0xf and n2 == 1 and n3 == 8:
             #FX18 Sets the sound timer to VX.
