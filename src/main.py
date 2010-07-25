@@ -20,6 +20,11 @@ class Chip8(object):
 
         self.loadChars()
 
+        # Initializing with a fixed seed makes random numbers generation a
+        # fixed sequence, like it probably was on actual hardware. This also
+        # makes emulation results reproducible and unit testing possible.
+        random.seed(self.pc)
+
     def loadChars(self):
         chars = [
         [0xF0, 0x90, 0x90, 0x90, 0xF0],
@@ -124,7 +129,7 @@ class Chip8(object):
             self.i = (n1 << 8) + b1
         elif n0 == 0xc:
             # CXNN Sets VX to a random number and NN.
-            self.v[n1] = int(random.random() * 255) & b1
+            self.v[n1] = random.randint(0, 255) & b1
         elif n0 == 0xd:
             # DXYN Draws a sprite at coordinate (VX, VY) that has a width of 8
             # pixels and a height of N pixels. As described above, VF is set
