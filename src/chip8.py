@@ -136,7 +136,7 @@ class Chip8(object):
             # to 1 if any screen pixels are flipped from set to unset when the
             # sprite is drawn, and to 0 if that doesn't happen.
             vx, vy = n1, n2
-            
+
             if n3 == 0:
                 w = 16
                 h = 16
@@ -146,7 +146,7 @@ class Chip8(object):
 
             x = self.v[vx]
             y = self.v[vy]
-            
+
             if n3 == 0:
                 data = [1]*16*16
             else:
@@ -217,7 +217,7 @@ class Chip8(object):
         elif n0 == 0xf and n2 == 1 and n3 == 8:
             #FX18 Sets the sound timer to VX.
             self.sound_timer = self.v[n1]
-                
+
         else:
             raise RuntimeError, "%02X%02X unimplemented" % (b0, b1)
 
@@ -234,7 +234,7 @@ class Chip8(object):
 
     def update_timers(self):
         assert not self.delay_timer < 0
-        
+
         if self.delay_timer > 0:
             self.delay_timer -= 1
 
