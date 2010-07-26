@@ -4,7 +4,13 @@
 import random
 
 class Chip8(object):
-    def __init__(self):
+    def __init__(self, original=False):
+
+        # Flag to force behaviours that are closer to original interpreter
+        # (e.g. i incremented after FX55/FX65), but that break games (blinky,
+        # hidden, etc...)
+        self._original = original
+
         self.pc = 0x200
         self.v = [0] * 16
         self.i = None
@@ -96,6 +102,10 @@ class Chip8(object):
         elif n0 == 4:
             # 4XNN Skips the next instruction if VX doesn't equal NN.
             if self.v[n1] != b1:
+                self.pc += 2
+        elif n0 == 5 and n3 == 0:
+            # 5XY0 Skips the next instruction if VX equals VY.
+            if self.v[n1] == self.v[n2]:
                 self.pc += 2
         elif n0 == 6:
             # 6XNN Sets VX to NN.
@@ -250,14 +260,16 @@ class Chip8(object):
             # FX55 Stores V0 to VX in memory starting at address I.
             for vv in range(n1+1):
                 self.mem[self.i + vv] = self.v[vv]
-            self.i += (n1+1)
+            if self._original:
+                self.i += (n1+1)
 
         elif n0 == 0xf and n2 == 6 and n3 == 5:
             # FX65 Fills V0 to VX with values from memory starting at address
             # I.
             for vv in range(n1+1):
                 self.v[vv] = self.mem[self.i + vv]
-            self.i += (n1+1)
+            if self._original:
+                self.i += (n1+1)
 
         else:
             raise RuntimeError, "%02X%02X unimplemented" % (b0, b1)
