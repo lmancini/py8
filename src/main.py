@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
-
 import pygame
-
 from chip8 import Chip8
+
+hz60 = int(1000.0 / 60.0)
+hz60_3 = int(1000.0 / 60.0 / 3.0)
 
 def convert_key(key):
     keys = {
@@ -43,6 +44,8 @@ def main(fn):
     c8.setScreen(pxarray)
 
     while True:
+        start = pygame.time.get_ticks()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
@@ -59,7 +62,7 @@ def main(fn):
                     c8.setReleased(key)
 
         c8.execute(1)
-        pygame.time.wait(5)
+        pygame.time.wait(hz60_3 - (pygame.time.get_ticks() - start))
 
 if __name__ == "__main__":
     main(sys.argv[1])
