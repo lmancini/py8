@@ -35,13 +35,12 @@ def main(fn):
     c8.loadRom(open(fn, "rb").read())
 
     pygame.init()
-    screen = pygame.display.set_mode((64, 32), pygame.HWSURFACE|pygame.DOUBLEBUF)
     pygame.display.set_caption("Py8")
-    pxarray = pygame.PixelArray(screen)
-    pxarray[:] = 0x000000
-    pygame.display.flip()
 
-    c8.setScreen(pxarray)
+    screen = pygame.display.set_mode((256, 128), pygame.HWSURFACE|pygame.DOUBLEBUF)
+
+    surface = pygame.Surface((64, 32))
+    c8.setScreen(surface)
 
     while True:
         start = pygame.time.get_ticks()
@@ -62,6 +61,8 @@ def main(fn):
                     c8.setReleased(key)
 
         c8.execute(1)
+        pygame.transform.scale(surface, (256, 128), screen)
+        pygame.display.flip()
         pygame.time.wait(hz60_3 - (pygame.time.get_ticks() - start))
 
 if __name__ == "__main__":

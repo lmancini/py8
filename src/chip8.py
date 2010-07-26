@@ -3,9 +3,6 @@
 
 import random
 
-# Used for pygame.display.flip - replace with a dirty flag set by the emulator
-import pygame
-
 class Chip8(object):
     def __init__(self):
         self.pc = 0x200
@@ -168,14 +165,12 @@ class Chip8(object):
                     if not pixel:
                         continue
 
-                    if self.scr[sx][sy] == 0x000000:
-                        self.scr[sx][sy] = 0xFFFFFF
+                    if self.scr.get_at((sx, sy)) == (0, 0, 0, 255):
+                        self.scr.set_at((sx, sy), (255, 255, 255, 255))
                     else:
-                        assert self.scr[sx][sy] == 0xFFFFFF, self.scr[sx][sy]
+                        assert self.scr.get_at((sx, sy)) == (255, 255, 255, 255), self.scr.get_at((sx, sy))
                         self.v[15] = 1
-                        self.scr[sx][sy] = 0x000000
-
-            pygame.display.flip()
+                        self.scr.set_at((sx, sy), (0, 0, 0, 255))
 
         elif n0 == 0xe and n2 == 0xa and n3 == 1:
             # EXA1 Skips the next instruction if the key stored in VX isn't
