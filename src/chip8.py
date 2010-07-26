@@ -106,6 +106,9 @@ class Chip8(object):
         elif n0 == 8 and n3 == 0:
             # 8XY0 Sets VX to the value of VY.
             self.v[n1] = self.v[n2]
+        elif n0 == 8 and n3 == 1:
+            # 8XY1 Sets VX to VX or VY.
+            self.v[n1] = self.v[n1] | self.v[n2]
         elif n0 == 8 and n3 == 2:
             # 8XY2 Sets VX to VX and VY.
             self.v[n1] = self.v[n1] & self.v[n2]
@@ -124,6 +127,16 @@ class Chip8(object):
             sub = self.v[n1] - self.v[n2]
             self.v[n1] = sub % 256
             self.v[15] = (sub / 256) + 1
+        elif n0 == 8 and n3 == 6:
+            # 8XY6 Shifts VX right by one. VF is set to the value of the least
+            # significant bit of VX before the shift.
+            self.v[15] = (self.v[n1] & 1)
+            self.v[n1] >>= 1
+        elif n0 == 8 and n3 == 0xe:
+            # 8XYE Shifts VX left by one. VF is set to the value of the most
+            # significant bit of VX before the shift.
+            self.v[15] = (self.v[n1] & 1)
+            self.v[n1] <<= 1
         elif n0 == 9 and n3 == 0:
             # 9XY0 Skips the next instruction if VX doesn't equal VY.
             if self.v[n1] != self.v[n2]:
@@ -167,6 +180,10 @@ class Chip8(object):
                     sx = (x + xx) % 64
                     sy = (y + yy)
 
+                    # Towers drawing code in BLITZ seems to expect this
+                    if not 0 <= sy < 32:
+                        continue
+
                     pixel = data[yy*w + xx]
 
                     if not pixel:
@@ -194,6 +211,12 @@ class Chip8(object):
         elif n0 == 0xf and n2 == 0 and n3 == 7:
             # FX07 Sets VX to the value of the delay timer.
             self.v[n1] = self.delay_timer
+
+        elif n0 == 0xf and n2 == 0 and n3 == 0xa:
+            # FX0A A key press is awaited, and then stored in VX.
+            if not True in self.keys:
+                return self.pc
+            self.v[n1] = self.keys.index(True)
 
         elif n0 == 0xf and n2 == 1 and n3 == 5:
             # FX15 Sets the delay timer to VX.
