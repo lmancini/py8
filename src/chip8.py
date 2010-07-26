@@ -6,7 +6,7 @@ import random
 class Chip8(object):
     def __init__(self):
         self.pc = 0x200
-        self.v = [None] * 16
+        self.v = [0] * 16
         self.i = None
         self.stack = []
         self.mem = [0]*4096 # 4096 bytes
@@ -76,7 +76,10 @@ class Chip8(object):
         n2 = (b1 & 0b11110000) >> 4
         n3 = (b1 & 0b00001111)
 
-        if n0 == 0 and n1 == 0 and n2 == 0xe and n3 == 0xe:
+        if n0 == 0 and n1 == 0 and n2 == 0xe and n3 == 0:
+            # 00E0 Clears the screen.
+            self.scr.fill((0, 0, 0, 255))
+        elif n0 == 0 and n1 == 0 and n2 == 0xe and n3 == 0xe:
             # 00EE Returns from a subroutine.
             return self.stack.pop()
         elif n0 == 1:
@@ -121,6 +124,10 @@ class Chip8(object):
             sub = self.v[n1] - self.v[n2]
             self.v[n1] = sub % 256
             self.v[15] = (sub / 256) + 1
+        elif n0 == 9 and n3 == 0:
+            # 9XY0 Skips the next instruction if VX doesn't equal VY.
+            if self.v[n1] != self.v[n2]:
+                self.pc += 2
         elif n0 == 0xa:
             # ANNN Sets I to the address NNN.
             self.i = (n1 << 8) + b1
@@ -178,6 +185,12 @@ class Chip8(object):
             if not self.keys[self.v[n1]]:
                 self.pc += 2
 
+        elif n0 == 0xe and n2 == 9 and n3 == 0xe:
+            # EX9E Skips the next instruction if the key stored in VX is
+            # pressed.
+            if self.keys[self.v[n1]]:
+                self.pc += 2
+
         elif n0 == 0xf and n2 == 0 and n3 == 7:
             # FX07 Sets VX to the value of the delay timer.
             self.v[n1] = self.delay_timer
@@ -189,6 +202,10 @@ class Chip8(object):
         elif n0 == 0xf and n2 == 1 and n3 == 8:
             # FX18 Sets the sound timer to VX.
             self.sound_timer = self.v[n1]
+
+        elif n0 == 0xf and n2 == 1 and n3 == 0xe:
+            # FX1E Adds VX to I.
+            self.i += self.v[n1]
 
         elif n0 == 0xf and n2 == 2 and n3 == 9:
             # FX29 Sets I to the location of the sprite for the character in
@@ -205,6 +222,12 @@ class Chip8(object):
             self.mem[self.i] = int(sn[0])
             self.mem[self.i + 1] = int(sn[1])
             self.mem[self.i + 2] = int(sn[2])
+
+        elif n0 == 0xf and n2 == 5 and n3 == 5:
+            # FX55 Stores V0 to VX in memory starting at address I.
+            for vv in range(n1+1):
+                self.mem[self.i + vv] = self.v[vv]
+            self.i += (n1+1)
 
         elif n0 == 0xf and n2 == 6 and n3 == 5:
             # FX65 Fills V0 to VX with values from memory starting at address

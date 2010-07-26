@@ -23,7 +23,7 @@ class TestChip8(unittest.TestCase):
         self.run_code("\x60\xff\x70\x02")
         self.assertEqual(self.c8.v[0], 1)
         # Carry untouched
-        self.assertEqual(self.c8.v[15], None)
+        self.assertEqual(self.c8.v[15], 0)
 
 if __name__ == "__main__":
     unittest.main()
