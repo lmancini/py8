@@ -151,7 +151,7 @@ class Chip8(object):
         elif n0 == 8 and n3 == 0xe:
             # 8XYE Shifts VX left by one. VF is set to the value of the most
             # significant bit of VX before the shift.
-            self.v[15] = (self.v[n1] & 1)
+            self.v[15] = (self.v[n1] & (1 << 7)) >> 7
             self.v[n1] <<= 1
         elif n0 == 9 and n3 == 0:
             # 9XY0 Skips the next instruction if VX doesn't equal VY.

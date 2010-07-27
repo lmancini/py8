@@ -25,5 +25,10 @@ class TestChip8(unittest.TestCase):
         # Carry untouched
         self.assertEqual(self.c8.v[15], 0)
 
+    def test_8xye_carry(self):
+        # Set v0 to 0xF0, shift left
+        self.run_code("\x60\xf0\x80\x0e")
+        self.assertEqual(self.c8.v[15], 1)
+
 if __name__ == "__main__":
     unittest.main()
