@@ -3,6 +3,12 @@
 
 import random
 
+def iterbits(char):
+    if not 0 <= char < 256:
+        raise RuntimeError
+    for dd in range(8):
+        yield ((char & (1 << (7 - dd))) >> (7 - dd)) & 0xff
+
 class Chip8(object):
     def __init__(self, original=False):
 
@@ -179,30 +185,30 @@ class Chip8(object):
             else:
                 data = []
                 for ii in range(h):
-                    char = self.mem[self.i + ii]
-                    for dd in range(w):
-                        m = (char & (1 << (7 - dd))) >> (7 - dd)
-                        data.append(m)
+                    data.extend(list(iterbits(self.mem[self.i + ii])))
 
             self.v[15] = 0
             for yy in range(h):
+                sy = (y + yy)
+
+                # Towers drawing code in BLITZ seems to expect this
+                if not 0 <= sy < 32:
+                    continue
+
                 for xx in range(w):
                     sx = (x + xx) % 64
-                    sy = (y + yy)
-
-                    # Towers drawing code in BLITZ seems to expect this
-                    if not 0 <= sy < 32:
-                        continue
 
                     pixel = data[yy*w + xx]
 
                     if not pixel:
                         continue
 
-                    if self.scr.get_at((sx, sy)) == (0, 0, 0, 255):
+                    pcol = self.scr.get_at((sx, sy))
+
+                    if pcol == (0, 0, 0, 255):
                         self.scr.set_at((sx, sy), (255, 255, 255, 255))
                     else:
-                        assert self.scr.get_at((sx, sy)) == (255, 255, 255, 255), self.scr.get_at((sx, sy))
+                        assert pcol == (255, 255, 255, 255), pcol
                         self.v[15] = 1
                         self.scr.set_at((sx, sy), (0, 0, 0, 255))
 
