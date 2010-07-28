@@ -164,10 +164,12 @@ class Chip8(object):
             # CXNN Sets VX to a random number and NN.
             self.v[n1] = random.randint(0, 255) & b1
         elif n0 == 0xd:
-            # DXYN Draws a sprite at coordinate (VX, VY) that has a width of 8
-            # pixels and a height of N pixels. As described above, VF is set
-            # to 1 if any screen pixels are flipped from set to unset when the
-            # sprite is drawn, and to 0 if that doesn't happen.
+            # Draws a sprite at coordinate (VX, VY) that has a width of 8
+            # pixels and a height of N pixels. Each row of 8 pixels is read as
+            # bit-coded starting from memory location I; I value doesn't change
+            # after the execution of this instruction. As described above, VF
+            # is set to 1 if any screen pixels are flipped from set to unset
+            # when the sprite is drawn, and to 0 if that doesn't happen.
             vx, vy = n1, n2
 
             if n3 == 0:
