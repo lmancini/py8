@@ -148,6 +148,12 @@ class Chip8(object):
             # significant bit of VX before the shift.
             self.v[15] = (self.v[n1] & 1)
             self.v[n1] >>= 1
+        elif n0 == 8 and n3 == 7:
+            # 8XY7 Sets VX to VY minus VX. VF is set to 0 when there's a
+            # borrow, and 1 when there isn't.
+            sub = self.v[n2] - self.v[n1]
+            self.v[n1] = sub % 256
+            self.v[15] = (sub / 256) + 1
         elif n0 == 8 and n3 == 0xe:
             # 8XYE Shifts VX left by one. VF is set to the value of the most
             # significant bit of VX before the shift.
