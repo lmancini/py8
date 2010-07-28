@@ -42,15 +42,16 @@ def main(fn):
     surface = pygame.Surface((64, 32))
     c8.setScreen(surface)
 
-    while True:
+    running = True
+    while running:
         start = pygame.time.get_ticks()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                sys.exit(0)
+                running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    sys.exit(0)
+                    running = False
                 else:
                     key = convert_key(event.key)
                     if key is not None:
