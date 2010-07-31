@@ -168,7 +168,7 @@ class Chip8(object):
             self.i = (n1 << 8) + b1
         elif n0 == 0xc:
             # CXNN Sets VX to a random number and NN.
-            self.v[n1] = random.randint(0, 255) & b1
+            self.v[n1] = random.randint(0, 256) & b1
         elif n0 == 0xd:
             # Draws a sprite at coordinate (VX, VY) that has a width of 8
             # pixels and a height of N pixels. Each row of 8 pixels is read as
