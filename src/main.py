@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import pygame
+try:
+    import pygame
+except ImportError:
+    import fakepygame as pygame
 from chip8 import Chip8
 
 hz60 = int(1000.0 / 60.0)
