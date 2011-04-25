@@ -44,6 +44,8 @@ class Surface(object):
     def set_at(self, xy, col):
         x, y = xy
         self.surf[self.w * y + x] = col
+    def fill(self, col):
+        self.surf[:] = [col] * self.w * self.h 
 
 display = Display()
 
