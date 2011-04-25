@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 try:
     import pygame
@@ -33,9 +34,22 @@ def convert_key(key):
 
     return keys.get(key)
 
-def main(fn):
+def file_read(fn):
+    fp = os.open(fn, os.O_RDONLY, 0777)
+    try:
+        contents = ""
+        while True:
+            read = os.read(fp, 4096)
+            if len(read) == 0:
+                break
+            contents += read
+    finally:
+        os.close(fp)
+    return contents
+
+def entry_point(argv):
     c8 = Chip8()
-    c8.loadRom(open(fn, "rb").read())
+    c8.loadRom(file_read(argv[0]))
 
     pygame.init()
     pygame.display.set_caption("Py8")
@@ -69,5 +83,9 @@ def main(fn):
         pygame.display.flip()
         pygame.time.wait(hz60_3 - (pygame.time.get_ticks() - start))
 
+def target(*args):
+    return entry_point, None
+
 if __name__ == "__main__":
-    main(sys.argv[1])
+    entry_point(sys.argv)
+
