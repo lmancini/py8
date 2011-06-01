@@ -7,7 +7,7 @@ def iterbits(char):
     if not 0 <= char < 256:
         raise RuntimeError
     for dd in range(8):
-        yield ((char & (1 << (7 - dd))) >> (7 - dd)) & 0xff
+        yield (char >> (7 - dd)) & 0x1
 
 class Chip8(object):
     def __init__(self, original=False):
