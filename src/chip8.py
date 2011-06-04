@@ -1,13 +1,27 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import random
+USE_PYPY = 0
+
+if USE_PYPY:
+    from pypy.rlib.rarithmetic import r_uint, intmask
+    from pypy.rlib.rrandom import Random
+
+    class rand(object):
+        def seed(self, seed):
+            self.r = Random(seed)
+        def randint(self, a, b):
+            r32 = self.r.genrand32()
+            r = a + r32 % (b - a)
+            return intmask(r)
+    random = rand()
+else:
+    import random
 
 def iterbits(char):
     if not 0 <= char < 256:
         raise RuntimeError
-    for dd in range(8):
-        yield (char >> (7 - dd)) & 0x1
+    return [((char >> (7 - dd)) & 0x1) for dd in range(8)]
 
 class Chip8(object):
     def __init__(self, original=False):
@@ -19,9 +33,9 @@ class Chip8(object):
 
         self.pc = 0x200
         self.v = [0] * 16
-        self.i = None
+        self.i = 0
         self.stack = []
-        self.mem = [0]*4096 # 4096 bytes
+        self.mem = [0] * 4096
         self.delay_timer = 0
         self.sound_timer = 0
 
@@ -72,16 +86,39 @@ class Chip8(object):
         self.scr = scr
 
     def loadRom(self, rom):
-        for i_c, c in enumerate(rom):
-            self.mem[0x200 + i_c] = ord(c)
+        self.mem[0x200:0x200 + len(rom)] = [ord(c) for c in rom]
+
+    def update_timers(self):
+        assert not self.delay_timer < 0
+
+        if self.delay_timer > 0:
+            self.delay_timer -= 1
+
+        # Emulate me please!
+        if self.sound_timer > 0:
+            self.sound_timer -= 1
 
     def fetch(self):
         return self.mem[self.pc], self.mem[self.pc+1]
 
+    def execute(self, num_cycles):
+        for _ in range(num_cycles):
+            b0, b1 = self.fetch()
+            newpc = self.opcode(b0, b1)
+            if newpc != -1:
+                self.pc = newpc
+            else:
+                self.pc += 2
+
+            self.update_timers()
+
     def opcode(self, b0, b1):
 
         if __debug__:
-            print "%02X%02X" % (b0, b1)
+            if USE_PYPY:
+                print "%x%x" % (b0, b1)
+            else:
+                print "%02X%02X" % (b0, b1)
 
         n0 = (b0 & 0b11110000) >> 4
         n1 = (b0 & 0b00001111)
@@ -193,7 +230,7 @@ class Chip8(object):
             else:
                 data = []
                 for ii in range(h):
-                    data.extend(list(iterbits(self.mem[self.i + ii])))
+                    data.extend(iterbits(self.mem[self.i + ii]))
 
             self.v[15] = 0
             for yy in range(h):
@@ -264,7 +301,12 @@ class Chip8(object):
         elif n0 == 0xf and n2 == 3 and n3 == 3:
             # FX33 Stores the Binary-coded decimal representation of VX at the
             # addresses I, I plus 1, and I plus 2.
-            sn = "%03d" % (self.v[n1],)
+            if USE_PYPY:
+                sn = "%d" % self.v[n1]
+                while len(sn) < 3:
+                    sn = "0" + sn
+            else:
+                sn = "%03d" % (self.v[n1],)
 
             self.mem[self.i] = int(sn[0])
             self.mem[self.i + 1] = int(sn[1])
@@ -286,25 +328,10 @@ class Chip8(object):
                 self.i += (n1+1)
 
         else:
-            raise RuntimeError, "%02X%02X unimplemented" % (b0, b1)
-
-    def execute(self, num_cycles):
-        for _ in xrange(num_cycles):
-            b0, b1 = self.fetch()
-            newpc = self.opcode(b0, b1)
-            if newpc:
-                self.pc = newpc
+            if USE_PYPY:
+                msg = "%x%x unimplemented" % (b0, b1)
             else:
-                self.pc += 2
+                msg = "%02X%02X unimplemented" % (b0, b1)
+            raise RuntimeError, msg
 
-            self.update_timers()
-
-    def update_timers(self):
-        assert not self.delay_timer < 0
-
-        if self.delay_timer > 0:
-            self.delay_timer -= 1
-
-        # Emulate me please!
-        if self.sound_timer > 0:
-            self.sound_timer -= 1
+        return -1
