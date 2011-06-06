@@ -11,3 +11,5 @@ http://chip8.com/
 http://www.rubyquiz.com/quiz88.html
 http://devernay.free.fr/hacks/chip8/
 http://members.chello.nl/~s.morsink/
+
+http://gotojake.wordpress.com/2010/11/13/chip-8-emulation-cpu/
