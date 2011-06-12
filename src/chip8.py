@@ -213,49 +213,36 @@ class Chip8(object):
             # after the execution of this instruction. As described above, VF
             # is set to 1 if any screen pixels are flipped from set to unset
             # when the sprite is drawn, and to 0 if that doesn't happen.
-            vx, vy = n1, n2
-
-            if n3 == 0:
-                w = 16
-                h = 16
-            else:
-                w = 8
-                h = n3
-
-            x = self.v[vx]
-            y = self.v[vy]
-
-            if n3 == 0:
-                data = [1]*16*16
-            else:
-                data = []
-                for ii in range(h):
-                    data.extend(iterbits(self.mem[self.i + ii]))
-
+            vx, vy = self.v[n1], self.v[n2]
+            w, h = 8, n3
             self.v[15] = 0
-            for yy in range(h):
-                sy = (y + yy)
+
+            for row in range(h):
+                rb = self.mem[self.i + row]
+                sy = vy + row
 
                 # Towers drawing code in BLITZ seems to expect this
                 if not 0 <= sy < 32:
                     continue
 
-                for xx in range(w):
-                    sx = (x + xx) % 64
+                for col in range(w):
+                    bit = (rb >> (w - 1 - col)) & 0x1
 
-                    pixel = data[yy*w + xx]
-
-                    if not pixel:
+                    if not bit:
                         continue
 
-                    pcol = self.scr.get_at((sx, sy))
+                    # This is expected behaviour: pixels flip on the other side
+                    sx = (vx + col) % 64
 
-                    if pcol == (0, 0, 0, 255):
-                        self.scr.set_at((sx, sy), (255, 255, 255, 255))
-                    else:
-                        assert pcol == (255, 255, 255, 255), pcol
+                    pixelpos = (sx, sy)
+
+                    pixel = self.scr.get_at(pixelpos)
+
+                    if pixel == (255, 255, 255, 255):
+                        self.scr.set_at(pixelpos, (0, 0, 0, 255))
                         self.v[15] = 1
-                        self.scr.set_at((sx, sy), (0, 0, 0, 255))
+                    else:
+                        self.scr.set_at(pixelpos, (255, 255, 255, 255))
 
         elif n0 == 0xe and n2 == 0xa and n3 == 1:
             # EXA1 Skips the next instruction if the key stored in VX isn't
@@ -332,6 +319,7 @@ class Chip8(object):
                 msg = "%x%x unimplemented" % (b0, b1)
             else:
                 msg = "%02X%02X unimplemented" % (b0, b1)
+            print msg
             raise RuntimeError, msg
 
         return -1
