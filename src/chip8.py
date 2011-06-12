@@ -4,14 +4,14 @@
 USE_PYPY = 0
 
 if USE_PYPY:
-    from pypy.rlib.rarithmetic import r_uint, intmask
+    from pypy.rlib.rarithmetic import intmask
     from pypy.rlib.rrandom import Random
 
     class rand(object):
         def seed(self, seed):
             self.r = Random(seed)
         def randint(self, a, b):
-            r32 = self.r.genrand32()
+            r32 = intmask(self.r.genrand32())
             r = a + r32 % (b - a)
             return intmask(r)
     random = rand()
@@ -114,7 +114,7 @@ class Chip8(object):
 
     def opcode(self, b0, b1):
 
-        if __debug__:
+        if False:
             if USE_PYPY:
                 print "%x%x" % (b0, b1)
             else:
