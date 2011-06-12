@@ -5,6 +5,7 @@ import os
 import sys
 
 USE_PYPY = 0
+BENCHMARK = 0
 
 if USE_PYPY:
     import pysdl as pygame
@@ -65,35 +66,50 @@ def entry_point(argv):
     surface.fill((0, 0, 0, 255))
     c8.setScreen(surface)
 
+    # Used for benchmark mode
+    start_time = pygame.time.get_ticks()
+    opcodes = 0
+
     running = True
     while running:
-        start = pygame.time.get_ticks()
+        if BENCHMARK == 0:
+            start = pygame.time.get_ticks()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     running = False
-                else:
-                    key = convert_key(event.key)
-                    if key is not None:
-                        c8.setPressed(key)
-            elif event.type == pygame.KEYUP:
-                key = convert_key(event.key)
-                if key is not None:
-                    c8.setReleased(key)
+                elif event.type in (pygame.KEYDOWN, pygame.KEYUP):
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                    else:
+                        try:
+                            key = convert_key(event.key)
+                        except KeyError:
+                            pass
+                        else:
+                            if event.type == pygame.KEYDOWN:
+                                c8.setPressed(key)
+                            elif event.type == pygame.KEYUP:
+                                c8.setReleased(key)
 
-        try:
-            c8.execute(1)
-        except RuntimeError:
-            return 1
+        c8.execute(1)
 
         pygame.transform.scale(surface, (256, 128), screen)
         pygame.display.flip()
-        elapsed = pygame.time.get_ticks() - start
-        if elapsed < hz60_3:
-            pygame.time.wait(hz60_3 - elapsed)
+
+        opcodes += 1
+
+        if opcodes % 10000 == 0:
+            secs = float(pygame.time.get_ticks() - start_time) / 1000.0
+            print "OPS: %f" % (opcodes / secs)
+
+        if BENCHMARK == 0:
+            elapsed = pygame.time.get_ticks() - start
+            if elapsed < hz60_3:
+                pygame.time.wait(hz60_3 - elapsed)
+        else:
+            if opcodes == 100000:
+                running = False
 
     return 0
 
@@ -101,4 +117,6 @@ def target(*args):
     return entry_point, None
 
 if __name__ == "__main__":
+    #import cProfile
+    #cProfile.run("entry_point(sys.argv)", sort=1)
     entry_point(sys.argv)
