@@ -1,0 +1,55 @@
+Diagramma componenti
+ CPU
+  - lista di opcode
+  - cicli
+  - program counter
+  - registri (dati, indirizzo, accumulatore)
+ Memoria
+
+L'inner loop di un emulatore
+
+ for _ in range(cycles_to_execute):
+     opcode = memory[PC++]
+     instruction = decode(opcode)
+     execute(instruction)
+
+Cosa manca?
+ Video
+  - Pixel format
+  - Sprite
+ I/O
+  - keyboard, mouse...
+ Interrupts!
+
+Il loop completo
+ while running:
+     executeCPU()
+     generateInterrupts()
+     updateVideo()
+     updateSound()
+     updateTimer()
+     sync()
+
+Il Chip-8
+ Cos'è: VM
+ Dati tecnici
+
+Partiamo da una ROM e da un minimain
+Dove vogliamo arrivare: screenshot BRIX
+
+Sequenza di slide con istruzioni di base da implementare
+CPU/Memoria
+Video
+I/O
+
+Demo con BRIX
+
+Adesso il programma completo...
+Modalità Benchmark
+
+Si può fare qualcosa di più veloce?
+Confronto con un interprete scritto in C
+Riscrittura Chip8 e main in RPython
+Compilazione
+
+Considerazioni
