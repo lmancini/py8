@@ -18,6 +18,11 @@ if USE_PYPY:
 else:
     import random
 
+if USE_PYPY:
+    from pypy.rlib.jit import JitDriver
+    jitdriver = JitDriver(greens=['pc', 'b0', 'b1'],
+                          reds=['v', 'mem', 'self'])
+
 def iterbits(char):
     if not 0 <= char < 256:
         raise RuntimeError
@@ -119,6 +124,10 @@ class Chip8(object):
                 print "%x%x" % (b0, b1)
             else:
                 print "%02X%02X" % (b0, b1)
+
+        if USE_PYPY:
+            jitdriver.jit_merge_point(pc=self.pc, v=self.v, mem=self.mem,
+                                      b0=b0, b1=b1, self=self)
 
         n0 = (b0 & 0b11110000) >> 4
         n1 = (b0 & 0b00001111)

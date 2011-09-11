@@ -12,6 +12,11 @@ if USE_PYPY:
 else:
     import pygame
 
+if USE_PYPY:
+    def jitpolicy(driver):
+        from pypy.jit.codewriter.policy import JitPolicy
+        return JitPolicy()
+
 from chip8 import Chip8
 
 hz60 = int(1000.0 / 60.0)
@@ -94,8 +99,9 @@ def entry_point(argv):
 
         c8.execute(1)
 
-        pygame.transform.scale(surface, (256, 128), screen)
-        pygame.display.flip()
+        if BENCHMARK == 0:
+            pygame.transform.scale(surface, (256, 128), screen)
+            pygame.display.flip()
 
         opcodes += 1
 
