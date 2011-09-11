@@ -6,6 +6,7 @@
 from pypy.rlib.rsdl import RSDL, RSDL_helper
 from pypy.rlib.rarithmetic import r_uint, intmask
 from pypy.rpython.lltypesystem import lltype, rffi
+from pypy.rlib.jit import dont_look_inside
 
 K_4 = RSDL.K_4
 K_UP = RSDL.K_UP
@@ -46,6 +47,11 @@ class Surface(object):
                                              r_uint(0x00FF0000),
                                              r_uint(0x0000FF00),
                                              r_uint(0x000000FF))
+
+    # pypy has been unable to jit calls to RSDL_helper get_pixel and
+    # set_pixel so far when translating, that's why we prevent the
+    # jitter from looking inside this and the next method.
+    @dont_look_inside
     def get_at(self, xy):
         x, y = xy
         RSDL.LockSurface(self.surface)
@@ -56,6 +62,7 @@ class Surface(object):
                 intmask((col >> 8) & 0xff),
                 intmask(col & 0xff))
 
+    @dont_look_inside
     def set_at(self, xy, col):
         x, y = xy
         c = r_uint((col[0] << 24) + (col[1] << 16) + (col[2] << 8) + col[3])
