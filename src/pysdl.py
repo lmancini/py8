@@ -3,10 +3,10 @@
 
 # XXX: very loose RSDL wrapper to resemble pygame's API
 
-from pypy.rlib.rsdl import RSDL, RSDL_helper
-from pypy.rlib.rarithmetic import r_uint, intmask
-from pypy.rpython.lltypesystem import lltype, rffi
-from pypy.rlib.jit import dont_look_inside
+from rpython.rlib.rsdl import RSDL, RSDL_helper
+from rpython.rlib.rarithmetic import r_uint, intmask
+from rpython.rtyper.lltypesystem import lltype, rffi
+from rpython.rlib.jit import dont_look_inside
 
 K_4 = RSDL.K_4
 K_UP = RSDL.K_UP

@@ -4,8 +4,8 @@
 USE_PYPY = 0
 
 if USE_PYPY:
-    from pypy.rlib.rarithmetic import intmask
-    from pypy.rlib.rrandom import Random
+    from rpython.rlib.rarithmetic import intmask
+    from rpython.rlib.rrandom import Random
 
     class rand(object):
         def seed(self, seed):
@@ -19,7 +19,7 @@ else:
     import random
 
 if USE_PYPY:
-    from pypy.rlib.jit import JitDriver
+    from rpython.rlib.jit import JitDriver
     jitdriver = JitDriver(greens=['pc', 'b0', 'b1'],
                           reds=['v', 'mem', 'self'])
 
